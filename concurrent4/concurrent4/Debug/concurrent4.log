@@ -1,0 +1,3 @@
+﻿  concurrent4.cpp
+c:\users\wiebe\source\repos\concurrent4\concurrent4\concurrent4.cpp(43): warning C4018: '<': signed/unsigned mismatch
+  concurrent4.vcxproj -> C:\Users\wiebe\source\repos\concurrent4\Debug\concurrent4.exe
