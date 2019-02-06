@@ -64,8 +64,9 @@ private:
 	{
 		for (int i = L; i < R; ++i) {
 			result += a[i] * b[i];
+			value++;
 		}
-		value++;
+		
 	}
 
 };
