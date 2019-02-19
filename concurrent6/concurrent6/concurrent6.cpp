@@ -26,10 +26,10 @@
 using namespace std;
 class ThreadPool; 
 // forward declare
-condition_variable ready_cv;
+//condition_variable ready_cv;
 condition_variable processed_cv;
-atomic<bool> ready(false);
-atomic<bool> processed(false);
+//atomic<bool> ready(false);
+//atomic<bool> processed(false);
 
 class Worker {
 public:
@@ -67,8 +67,9 @@ void Worker::operator()()
 			pool.tasks.pop_front();
 			locker.unlock();
 			task();
-			processed = true; //proces
-			processed_cv.notify_one(); //notify
+			//processed = true; //proces
+			//processed_cv.notify_one(); //notify
+			processed_cv.wait; //wait
 		}
 		else {
 			locker.unlock();
@@ -86,7 +87,7 @@ ThreadPool::ThreadPool(size_t threads) : stop(false)
 ThreadPool::~ThreadPool()
 {
 	stop = true; // stop all threads
-	//hier notify
+	processed_cv.notify_one();//hier notify
 
 	for (auto &thread : workers)
 		thread.join();
@@ -98,10 +99,10 @@ void ThreadPool::enqueue(F f)
 {
 	std::unique_lock<std::mutex> lock(queue_mutex);
 	tasks.push_back(std::function<void()>(f));
-	processed = false; //unproces
-	ready = true; //ready
+	//processed = false; //unproces
+	//ready = true; //ready
 	ready_cv.notify_one(); //notify
-	processed_cv.wait(lock, [] { return processed.load(); }); //wait load
+	//processed_cv.wait(lock, [] { return processed.load(); }); //wait load
 }
 
 int main()
