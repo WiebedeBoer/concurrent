@@ -27,7 +27,7 @@ using namespace std;
 class ThreadPool; 
 // forward declare
 //condition_variable ready_cv;
-condition_variable processed_cv;
+//condition_variable processed_cv;
 //atomic<bool> ready(false);
 //atomic<bool> processed(false);
 
@@ -46,7 +46,7 @@ public:
 	~ThreadPool();
 private:
 	friend class Worker;
-
+	std::condition_variable cond; //condition here
 	std::vector<std::thread> workers;
 	std::deque<std::function<void()>> tasks;
 
@@ -59,21 +59,24 @@ void Worker::operator()()
 	std::function<void()> task;
 	while (true)
 	{
-		std::unique_lock<std::mutex> locker(pool.queue_mutex);
 		if (pool.stop) return;
-		if (!pool.tasks.empty())
-		{
+		std::unique_lock<std::mutex> locker(pool.queue_mutex);
+		pool.cond.wait(locker, [this]() { return !pool.tasks.empty() || pool.stop; });
+
+			if (pool.stop) return;
 			task = pool.tasks.front();
-			pool.tasks.pop_front();
-			locker.unlock();
-			task();
-			//processed = true; //proces
-			//processed_cv.notify_one(); //notify
-			processed_cv.wait; //wait
-		}
-		else {
-			locker.unlock();
-		}
+		pool.tasks.pop_front();
+		locker.unlock();
+		task();
+		//if (!pool.tasks.empty())
+		//{	
+			//processed_cv.notify_one(); //notify		
+			//processed = true; //proces			
+			//processed_cv.wait(locker); //wait
+		//}
+		//else {
+		//	locker.unlock();
+		//}
 	}
 }
 
@@ -86,9 +89,10 @@ ThreadPool::ThreadPool(size_t threads) : stop(false)
 //destruct
 ThreadPool::~ThreadPool()
 {
+	
 	stop = true; // stop all threads
-	processed_cv.notify_one();//hier notify
-
+	cond.notify_all();//hier notify allemaal
+	
 	for (auto &thread : workers)
 		thread.join();
 }
@@ -101,7 +105,8 @@ void ThreadPool::enqueue(F f)
 	tasks.push_back(std::function<void()>(f));
 	//processed = false; //unproces
 	//ready = true; //ready
-	ready_cv.notify_one(); //notify
+	lock.unlock();
+	cond.notify_all(); //notify allemaal
 	//processed_cv.wait(lock, [] { return processed.load(); }); //wait load
 }
 
