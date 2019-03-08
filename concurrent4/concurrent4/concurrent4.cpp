@@ -55,7 +55,7 @@ private:
 	const Vector &a;
 	const Vector &b;
 	//std::atomic<int> ready_flag;
-	std::atomic<int> value;
+	std::atomic<int> result;
 
 	std::vector<std::thread> workers;
 	int result;
@@ -64,7 +64,7 @@ private:
 	{
 		for (int i = L; i < R; ++i) {
 			result += a[i] * b[i];
-			value++;
+			result++;
 		}
 		
 	}
@@ -75,7 +75,7 @@ int main()
 {
 	int nr_elements = 100000;
 	//std::atomic<int> ready_flag = 0; //atomic
-	std::atomic<int> value = 0;
+	std::atomic<int> result = 0;
 
 	// Fill two vectors with some values 
 	Vector v1(nr_elements, 1), v2(nr_elements, 2);
